@@ -1,0 +1,10 @@
+{
+  "database": "bulletproof",
+  "username": "iamuteti",
+  "password": "iamuteti",
+  "params": {
+    "host": "localhost",
+    "dialect": "postgres",
+    "operatorsAliases": false
+  }
+}
