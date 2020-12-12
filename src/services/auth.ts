@@ -48,11 +48,13 @@ export default class AuthService {
       const hashedPassword = await argon2.hash(userInputDTO.password, { salt });
       this.logger.silly('Creating user db record');
 
-      const userRecord: UserInstance = await db.User.create({
-        ...userInputDTO,
-        salt: salt.toString('hex'),
-        password: hashedPassword,
-      });
+      const userRecord: UserInstance = await db.User.create(
+        {
+          ...userInputDTO,
+          salt: salt.toString('hex'),
+          password: hashedPassword,
+        },
+        { raw: true });
       this.logger.silly('Generating JWT');
       const token = this.generateToken(userRecord);
 
@@ -82,10 +84,10 @@ export default class AuthService {
 
   public async SignIn(email: string, password: string): Promise<{ user: IUser; token: string }> {
     const userRecord = await db.User.findOne({
-      where: { email: String(email) }
+      where: { email: String(email) },
+      raw: true
     });
 
-    this.logger.debug('Users...', userRecord);
     if (!userRecord) {
       throw new Error('User not registered');
     }
@@ -100,9 +102,10 @@ export default class AuthService {
       this.logger.silly('Generating JWT');
       const token = this.generateToken(userRecord);
 
-      const user = userRecord.toObject();
+      const user = userRecord;
       Reflect.deleteProperty(user, 'password');
       Reflect.deleteProperty(user, 'salt');
+      this.logger.debug(user);
       /**
        * Easy as pie, you don't need passport.js anymore :)
        */
@@ -129,10 +132,11 @@ export default class AuthService {
     this.logger.silly(`Sign JWT for userId: ${user._id}`);
     return jwt.sign(
       {
-        _id: user._id, // We are gonna use this in the middleware 'isAuth'
+        _id: user.id, // We are gonna use this in the middleware 'isAuth'
         role: user.role,
         name: user.name,
         exp: exp.getTime() / 1000,
+        algorithm: "HS256"
       },
       config.jwtSecret
     );
