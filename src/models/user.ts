@@ -1,31 +1,50 @@
-import { IUser } from '../interfaces/IUser';
-import mongoose from 'mongoose';
+import * as Sequelize from 'sequelize';
+import { SequelizeAttributes } from '../typings/SequelizeAttributes';
 
-const User = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Please enter a full name'],
-      index: true,
-    },
+export interface UserAttributes {
+    _id?: string;
+    name: string;
+    email: string;
+    password: string;
+    salt: string;
+    role: string;
+    lastLogin?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
+};
 
-    email: {
-      type: String,
-      lowercase: true,
-      unique: true,
-      index: true,
-    },
+export interface UserInstance extends Sequelize.Instance<UserAttributes>, UserAttributes {
 
-    password: String,
+};
 
-    salt: String,
+export const UserFactory = (sequelize: Sequelize.Sequelize, DataTypes: Sequelize.DataTypes): Sequelize.Model<UserInstance, UserAttributes> => {
+    const attributes: SequelizeAttributes<UserAttributes> = {
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        salt: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        role: {
+            type: DataTypes.STRING,
+            defaultValue: 'user'
+        },
+        lastLogin: {
+            type: DataTypes.DATE,
+            allowNull: false
+        }
+    };
 
-    role: {
-      type: String,
-      default: 'user',
-    },
-  },
-  { timestamps: true },
-);
-
-export default mongoose.model<IUser & mongoose.Document>('User', User);
+    const User = sequelize.define<UserInstance, UserAttributes>('User', attributes);
+    return User;
+};

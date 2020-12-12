@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import { DbInterface } from'../typings/DbInterface';
-import { UserFactory } from './Userr';
+import { UserFactory } from './user';
 
 export const createModels = (sequelizeConfig: any): DbInterface => {
   const { database, username, password, params } = sequelizeConfig;

@@ -8,7 +8,7 @@ import { IUser, IUserInputDTO } from '../interfaces/IUser';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
 import events from '../subscribers/events';
 import { createModels } from '../models';
-import { UserInstance } from '../models/Userr';
+import { UserInstance } from '../models/user';
 
 const sequelizeConfig = require('../config/config.json');
 const db = createModels(sequelizeConfig);
@@ -17,7 +17,6 @@ db.sequelize.sync();
 @Service()
 export default class AuthService {
   constructor(
-    @Inject('userModel') private userModel: Models.UserModel,
     private mailer: MailerService,
     @Inject('logger') private logger,
     @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
@@ -105,7 +104,6 @@ export default class AuthService {
       const user = userRecord;
       Reflect.deleteProperty(user, 'password');
       Reflect.deleteProperty(user, 'salt');
-      this.logger.debug(user);
       /**
        * Easy as pie, you don't need passport.js anymore :)
        */
@@ -136,7 +134,7 @@ export default class AuthService {
         role: user.role,
         name: user.name,
         exp: exp.getTime() / 1000,
-        algorithm: "HS256"
+        algorithm: config.jwtAlgorithm
       },
       config.jwtSecret
     );
